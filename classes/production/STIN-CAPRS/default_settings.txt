@@ -1,0 +1,422 @@
+#
+# Default settings for the simulation
+#
+
+## 0. Scenario and Overall settings
+	Scenario.name = satellite network simulation
+	Scenario.simulateConnections = true
+	Scenario.updateInterval = 0.005
+	# 43200s == 12h
+	Scenario.endTime = 10
+
+	#是否启用多线程
+	userSetting.multiThread = false
+
+## 1. GUI settings
+    # Image rotation (radians)
+		GUI.UnderlayImage.rotate = -0.015
+	# decide to use new GUI or not, used in DTNSim.java
+		userSetting.GUI = false
+	# GUI underlay image settings
+		GUI.UnderlayImage.fileName = data/helsinki_underlay.png
+	# Image offset in pixels (x, y)
+		GUI.UnderlayImage.offset = 64, 20
+	# Scaling factor for the image
+		GUI.UnderlayImage.scale = 104.75
+
+
+	# how many events to show in the log panel (default = 30)
+		GUI.EventLogPanel.nrofEvents = 30
+	# Regular Expression log filter (see Pattern-class from the Java API for RE-matching details)
+	# GUI.EventLogPanel.REfilter = .*p[1-9]<->p[1-9]
+
+	## Movement model settings
+	# seed for movement models' pseudo random number generator (default = 0)
+		MovementModel.rngSeed = 1
+	# World's size for Movement Models without implicit size (width, height; meters)
+		MovementModel.worldSize = 100000, 100000, 100000
+	# How long time to move hosts in the world before real simulation
+	#warmup此项影响启动时间，特别是在updateinterval设置过小时，典型值=10
+		MovementModel.warmup = 1
+
+
+## 2. Reports - all report names have to be valid report classes
+
+	# how many reports to load
+	Report.nrofReports = 9
+	# length of the warm up period (simulated seconds)
+	Report.warmup = 0
+	# default directory of reports (can be overridden per Report with output setting)
+	Report.reportDir = reports/
+	# Report classes to load
+	Report.report1 = MessageStatsReport
+	Report.report2 = MessageDelayReport
+	Report.report3 = DeliveredMessagesReport
+	Report.report4 = CreatedMessagesReport
+	Report.report5 = ContactTimesReport
+	Report.report6 = MessageReport
+	Report.report7 = MessageDeletedReport
+	Report.report8 = MessageAbortedReport
+	Report.report9 = MessageTransmissionRateReport
+
+
+## 3. Optimization settings -- these affect the speed of the simulation
+	## see World class for details.
+	#在world.java中的initSettings函数中读取
+	Optimization.cellSizeMult = 5
+	Optimization.randomizeUpdateOrder = true
+
+## 4. Group-specific settings:
+	# 4.0 satellite network setting
+		# Define 6 different node groups
+		Scenario.nrofHostGroups = 1
+
+		# Router mode - AllConnected or Cluster (for ClusteringRouter)
+		userSetting.routerMode = AllConnected
+		#userSetting.routerMode = Cluster
+		#userSetting.hostsMode = cluster
+		userSetting.hostsMode = normal
+
+		# Constellation setting
+			#WalkerStar-极轨道
+			#Group.Constellation = WalkerStar
+			#WalkerDelta-倾斜轨道
+			Group.Constellation = WalkerDelta
+
+		# 太阳同步轨道倾角参考ODIN卫星轨道倾角为97.8度
+		# LEO卫星节点参数
+			Group.nrofCommunicationNodesInEachPlane = 10
+			Group.nrofLEO = 80
+			Group.nrofLEOPlanes = 8
+			Group.LEO_OrbitPlaneAngle = 53
+			Group.LEO_Eccentricity = 0
+			Group.LEO_Radius = 1050
+
+		# MEO卫星节点参数
+			Group.EnableMEO = false
+			Group.MEO_OrbitPlaneAngle = 97.8
+			Group.MEO_Radius = 12000
+			Group.nrofMEO = 20
+			Group.nrofMEOPlane = 5
+			Group.MEO_Eccentricity = 0
+
+			#comfirmTtl与更新间隔时间MEOCheckInterval，2者设为10分之一的关系
+			#在message函数中TTL计算是以一分钟为单位
+			Group.comfirmTtl = 1
+			Group.MEOCheckInterval = 60
+
+		# GEO卫星节点参数
+			Group.EnableGEO =false
+			Group.GEO_OrbitPlaneAngle = 0
+			Group.GEO_Radius = 35786
+			Group.nrofGEO = 6
+			Group.nrofGEOPlane = 1
+			Group.GEO_Eccentricity = 0
+		#用户
+			Group2.nrofHosts = 0
+			Group2.groupID = TerrestrialUser
+			Group2.nrofInterfaces = 1
+			Group2.interface1 = Interface1
+			#Interface1.type = SatelliteWithChannelModelInterface
+			#Interface1.linkDelayRange = 0
+			#Interface1.transmitSpeed = 2.5M
+			Group2.movementModel = StationaryMovement3D
+			Group2.nodeLocation = [46982,48733,55467]
+			#[46982,48733,55467]
+			Group2.bufferSize = 2000M
+		#地面站
+			Group3.groupID = GroundStation
+			Group3.nrofHosts = 0
+			Group3.nrofInterfaces = 1
+			Group3.interface1 = Interface1
+			#Interface1.type = SatelliteWithChannelModelInterface
+			#Interface1.type = SimpleSatelliteInterface
+			#Interface1.linkDelayRange = 0
+			#Interface1.transmitRange = 30000
+			#Interface1.transmitSpeed = 10M
+			#假定地面站的buffer足够大
+			Group3.bufferSize = 2000M
+			Group3.movementModel = StationaryMovement3D
+			Group3.nodeLocation = [46000,48000,55000]
+
+	# 4.1 router: router used to route messages (valid class name from routing package)
+		# 4.1.1 Normal routing module without extra settings
+		    #Group.router = FirstContactRouter
+			#Group.router = DirectDeliveryRouter
+			#Group.router = EpidemicRouter
+			#Group.router = NetGridRouter
+			#Group.router = TwoLayerRouterBasedonGridRouter
+			#Group.router = SourceRoutingDijsktraSearchBasedonTemporalGraph
+			#Group.router = DirectDeliveryRouter
+			Group.router = ShortestPathFirstRouter
+			#Group.router = OptimizedClusteringRouter
+			#Group.router = DynamicMultiLayerSatelliteRouter
+			#Group.router = CGR
+		# 4.1.2 Normal routing module with extra settings
+			# 4.1.2.1 ClusteringRouter
+			#simpleConnectivity;
+			#分簇路由相关参数
+			#Group.router = ClusteringRouter
+			#分簇路由相关参数
+			#clusterCheckInterval unit:seconds
+			Group.clusterCheckInterval = 60
+			#bytes
+			Group.comfirmMessageSize = 1
+			#对于网格路由的计算模式
+			#Group.router = NetGridRouter
+			#Group.gridUpdateOption = preOrbitCalculation
+			#Group.gridUpdateOption = onlineOrbitCalculation
+
+			# 4.1.2.2 Netgrid-based routing
+			#Group.Pre_or_onlineOrbitCalculation = preOrbitCalculation
+			Group.Pre_or_onlineOrbitCalculation = onlineOrbitCalculation
+			#Group.router = SPNRmodify
+			Group.layer = 1
+
+			# 4.1.2.3 CGR-based routing
+			#Group.router = CGR
+			#Interface.type = ContactGraphInterface
+			#Group.router.CGR.linkDuration = 2
+			#Group.router.CGR.type = NoPreContactPlanDesign
+			#LinkDuration乘以updateInterval为真实链路持续时间
+			Group.router.CGRLinkDurationTimesOfUpdateInterval = 10
+
+            # 4.1.2.4 GNN-based routing
+            #Group.router = gnn_router
+            Group.model_path = data/NeuralNetworkModel/pb_model_all_160
+
+		## 4.1.3 Default settings for some routers settings
+			ProphetRouter.secondsInTimeUnit = 30
+			SprayAndWaitRouter.nrofCopies = 6
+			SprayAndWaitRouter.binaryMode = true
+
+	# 4.2 groupID : Group's identifier. Used as the prefix of host names
+		# group1 (pedestrians) specific settings
+		Group1.groupID = Satellite
+
+	# 4.3 nrofHosts: number of hosts in the group
+		# 总的卫星节点数目
+		Group.nrofHosts = 80
+
+	# 4.4 movementModel: movement model of the hosts (valid class name from movement package)
+        # Common settings for all groups
+            #Group.movementModel = PredictableMovement自己创建的新运动模型，里面函数暂时均没有调用
+            Group.movementModel =  SatelliteMovement
+        #used in ''SatelliteMovement.java'',用于固定卫星网络节点位置/拓扑状态，测试静态网络
+            userSetting.stationaryTestMode = false
+        #设置对应的仿真时间，实现对指定时间固定网络拓扑
+            userSetting.stationaryTimeSetting = 30.0
+        #是否开启拓扑记录选项，开启后记录的拓扑放在MessageTransmissionRateReport当中
+            userSetting.topologyRecord = true
+            #Group.movementModel =  StationaryMovement
+            #Group.nodeLocation=[0,3000; 0,2000]
+
+		#节点间链路更新时，计算模式选择
+		#MovementModel.judgeNearInterfaceMode = Fast-Grid
+		MovementModel.judgeNearInterfaceMode = Ergodic
+
+	# 4.5 waitTime: minimum and maximum wait times (seconds) after reaching destination
+		Group.waitTime = 0, 120
+
+	# 4.6 speed: minimum and maximum speeds (m/s) when moving on a path
+		# Walking speeds
+		Group.speed = 0.5, 1.5
+
+	# 4.7 bufferSize: size of the message buffer (bytes)
+		Group.bufferSize = 16M
+		#filebuffersize used in ''RelayRouterforInternetAccess.java''
+		#Group.filebuffersize = 1000M
+
+	# 4.8 msgTtl : TTL (minutes) of the messages created by this host group, default=infinite
+		# Message TTL of 300 minutes (5 hours)
+		Group.msgTtl = 300
+
+	# 4.9 other settings :
+		#1 random, 2, FIFO
+			Group.sendQueue = 2
+
+		#unit:minutes
+			Group.HelloInterval = 2
+			Group.HelloTTL = 1
+			Group.HelloMessageSize = 1
+
+## 5. Interface-specific settings:
+# type : which interface class the interface belongs to
+# For different types, the sub-parameters are interface-specific
+# For SimpleBroadcastInterface, the parameters are:
+# transmitSpeed : transmit speed of the interface (bytes per second)
+# transmitRange : range of the interface (meters)
+
+	## 5.1 链路模块参数
+	# one satellite node can bind multiple interfaces
+		Group.nrofInterfaces = 1
+		Group.interface1 = Interface1
+		Group.interface2 = Interface2
+
+		Interface1.type = SimpleSatelliteInterface
+		#Interface1.type = SatelliteWithChannelModelInterface
+
+		Interface1.linkDelayRange = 0,0
+
+
+
+		Interface1.transmitSpeed = 1.25M
+
+
+
+		Interface1.transmitRange = 6000
+		Interface1.nrofRadioInterface = 1
+		Interface2.type = SatelliteLaserInterface
+		Interface2.linkDelayRange = 1,5
+		Interface2.transmitSpeed = 200M
+		Interface2.transmitRange = 30000
+
+	# Transmit speed of 2 Mbps (bit/s) = 250kBps (Byte/s), transmit speed unit in ONE is Byte
+		Interface.transmitSpeed = 1M
+	#注意：ONE中距离单位是meters
+	#由于JAT中距离单位为km，因此我们将ONE中的距离单位统一视为km，这样只会在自带的图形界面单位上产生误解，但内部程序的逻辑上没有问题
+		Interface.transmitRange = 4000
+
+	# 设置阈值，大于此阈值通过激光链路走，小于此阈值的从微波链路走
+		Interface.MessageThreshold = 1M
+	# 是否选择开启中断
+		Interface.enableInterrupt = false
+		Interface.probabilityOfInterrupt = 0.00
+		Interface.reTransmitTime = 3
+	# 是否允许动态分簇
+		Interface.DynamicClustering = false
+	# 是否选用最优化路由
+		DynamicMultiLayerSatelliteRouter.Optimized = false
+	# 是否开启源路由方式
+		Group.msgPathLabel = false
+
+	# 5.2 Settings for satellite-terrestrial communication
+	#星地接入添加的设置选项，用于''RelayRouterforInternetAccess.java''
+		userSetting.enableBackupSatellite = true
+		userSetting.transmissionMode = enableBackupSatellite
+		#userSetting.transmissionMode = preMigrationHandover
+		#userSetting.transmissionMode = normalHandover
+		#userSetting.transmissionMode = SINRHandover
+		userSetting.SNR_threshold = 60
+	#skip the update of useless satellite router or not, used in RelayRouterforInternetAccess.java
+		userSetting.fastMode = true
+	# upper limits of backup satellites, used in RelayRouterforInternetAccess.java
+	#注意，这里指加上当前接入节点的总备份节点数为N个，而不是N+1个
+		userSetting.nrofBackupSatellites = 2
+		userSetting.nrofRobustBackupSatellite = 0
+	#设置切换窗口时间--handover window--userSetting.accessSatellitesUpdateInterval
+		userSetting.accessSatellitesUpdateInterval = 0.1
+	# minimum elevation angle unit: degree
+		userSetting.minimumElevationAngle = 50.4
+	# change satellite handover criterion (minimumElevationAngle / maximumConnectionDuration), used in RelayRouterforInternetAccess.java
+		userSetting.handoverCriterion = minimumElevationAngle
+		#userSetting.handoverCriterion = maximumConnectionDuration
+	#以下为链路模型设置相关参数
+	#Transmitting Power Unit: dBm W, used in SatellitetoGroundChannelModel.java
+		userSetting.TransmittingPower = 40
+	#Transmitting Frequency Unit: Hz, used in RelayRouterforInternetAccess.java
+		userSetting.TransmittingFrequency = 20000M
+	#Transmitting Frequency Unit: Hz, used in RelayRouterforInternetAccess.java
+		userSetting.Bandwidth = 1M
+		userSetting.constantSpeedOfGroundStationLink = 10M
+	# used in RelayRouterforInternetAccess.java
+	# Rayleigh, Rice, and Shadowing (i.e., Shadowing Rice) in channelModel.java
+		userSetting.channelModel = Rice
+	#userSetting.channelModel = Shadowing
+	#userSetting.shadowingMode = globalLink
+		userSetting.shadowingMode = transferringLink
+	#userSetting.shadowingMode = partialLink
+		userSetting.nrofShadowingLink = 2
+	#shadowing duration unit: second
+		userSetting.shadowingDuration = 2
+		userSetting.shadowingProbability = 0.02
+		userSetting.energyRatio_Rice = 10
+	#noise density, unit: dB
+		userSetting.spectralDensityNoisePower = -164
+	#unit: m
+		userSetting.transmitAntennaDiameter = 0.1
+		userSetting.receiverAntennaDiameter = 0.1
+
+## 6. The other specific settings
+	## 6.1 events generation 消息参数生成
+		# How many event generators
+			Events.nrof = 1
+		# Class of the first event generator
+
+		#Events1.class = MessageCreateEvent
+	    #Events1.class = MessageEventGenerator
+		Events1.class = ExtendedMessageEventGenerator
+		#used in ExtendedMessageEventGenerator.java
+			Events1.SpecificMessageGenerator = true
+			Events2.class = MessageEventGenerator
+
+		# (following settings are specific for the MessageEventGenerator class)
+		# Creation interval in seconds (one new message every 25 to 35 seconds)
+		# 自用，data数据包的大小设置
+		Events1.dataMessageSize = 100000
+
+		#Events1.interval = 1,100
+			Events1.interval = 1,2
+			Events2.interval = 1,10
+		# Message sizes (500kB - 1MB)
+			Events1.size = 1k,1k
+		#Events1.size = 64k,64k
+			Events2.size = 2M,5M
+		# range of message source/destination addresses
+		#Events1.hosts = [0,9;0,19;0,29;0,39;0,49]修改，注意hosts和tohosts包括下界但不包括上界，即[0, 9)
+			Events1.hosts = [0,11]
+			Events1.tohosts = [60,80]
+			Events2.hosts = [0,10]
+		# Message ID prefix
+			Events1.prefix = RadioM
+			Events2.prefix = LaserM
+		# messageCreateMode (normal or batch) used in MessageCreateEvent.java
+			userSetting.messageCreateMode = batch
+			userSetting.batchCreateNumber = 10
+
+
+	# 6.2 in-network Caching 缓存相关参数
+		userSetting.EnableCache = false
+		userSetting.RandomDropMessage = false
+		Group.nrofFile = 60
+		userSetting.collectpoplistinterval=200
+		userSetting.BufferSize=50
+		userSetting.cacheenablednodemin=11
+		userSetting.cacheenablednodemax=20
+		userSetting.inputpath=zipfdistributionreal.txt
+		#1代表进行预测 0代表不预测
+		userSetting.prediction=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

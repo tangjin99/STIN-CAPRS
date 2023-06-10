@@ -1,0 +1,13 @@
+HISTORY
+
+This document describes the main changes between each release version.
+The original version is based on ONE Version 1.6.0 (https://github.com/akeranen/the-one).
+
+Version 0.1 (May 2017)
+ - Upload code to github:https://github.com/infonetlijian/ONE-Extended-Simulator
+ - Add new GUI module
+ - Add satellite orbit calculation module
+ - Add new routing modules for satellite routing : CGR(Contact Graph Routing) and others (should be uploaded after a while)
+ - Extend the 3-dimensional support in Coord.java
+ 
+ 
